@@ -72,6 +72,10 @@ def _import_aviary() -> Type[BaseLLM]:
     return Aviary
 
 
+def _import_opea() -> Type[BaseLLM]:
+    from langchain_community.llms.opea import OPEALLM
+    return OPEALLM
+
 def _import_azureml_endpoint() -> Type[BaseLLM]:
     from langchain_community.llms.azureml_endpoint import AzureMLOnlineEndpoint
 
@@ -458,12 +462,6 @@ def _import_openlm() -> Type[BaseLLM]:
     return OpenLM
 
 
-def _import_outlines() -> Type[BaseLLM]:
-    from langchain_community.llms.outlines import Outlines
-
-    return Outlines
-
-
 def _import_pai_eas_endpoint() -> Type[BaseLLM]:
     from langchain_community.llms.pai_eas_endpoint import PaiEasEndpoint
 
@@ -695,6 +693,8 @@ def __getattr__(name: str) -> Any:
         return _import_arcee()
     elif name == "Aviary":
         return _import_aviary()
+    elif name == "OPEALLM":
+        return _import_opea()
     elif name == "AzureMLOnlineEndpoint":
         return _import_azureml_endpoint()
     elif name == "BaichuanLLM" or name == "Baichuan":
@@ -813,8 +813,6 @@ def __getattr__(name: str) -> Any:
         return _import_openllm()
     elif name == "OpenLM":
         return _import_openlm()
-    elif name == "Outlines":
-        return _import_outlines()
     elif name == "PaiEasEndpoint":
         return _import_pai_eas_endpoint()
     elif name == "Petals":
@@ -904,6 +902,7 @@ __all__ = [
     "Aphrodite",
     "Arcee",
     "Aviary",
+    "OPEALLM",
     "AzureMLOnlineEndpoint",
     "AzureOpenAI",
     "BaichuanLLM",
@@ -962,7 +961,6 @@ __all__ = [
     "OpenAIChat",
     "OpenLLM",
     "OpenLM",
-    "Outlines",
     "PaiEasEndpoint",
     "Petals",
     "PipelineAI",
@@ -1011,6 +1009,7 @@ def get_type_to_cls_dict() -> Dict[str, Callable[[], Type[BaseLLM]]]:
         "anyscale": _import_anyscale,
         "arcee": _import_arcee,
         "aviary": _import_aviary,
+        "opea": _import_opea,
         "azure": _import_azure_openai,
         "azureml_endpoint": _import_azureml_endpoint,
         "baichuan": _import_baichuan,
@@ -1085,7 +1084,6 @@ def get_type_to_cls_dict() -> Dict[str, Callable[[], Type[BaseLLM]]]:
         "vertexai_model_garden": _import_vertex_model_garden,
         "openllm": _import_openllm,
         "openllm_client": _import_openllm,
-        "outlines": _import_outlines,
         "vllm": _import_vllm,
         "vllm_openai": _import_vllm_openai,
         "watsonxllm": _import_watsonxllm,

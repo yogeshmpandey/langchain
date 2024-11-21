@@ -176,6 +176,9 @@ if TYPE_CHECKING:
         OpenVINOBgeEmbeddings,
         OpenVINOEmbeddings,
     )
+    from langchain_community.embeddings.opea import (
+        OPEAEmbeddings,
+    )
     from langchain_community.embeddings.optimum_intel import (
         QuantizedBiEncoderEmbeddings,
     )
@@ -299,6 +302,7 @@ __all__ = [
     "OpenAIEmbeddings",
     "OpenVINOBgeEmbeddings",
     "OpenVINOEmbeddings",
+    "OPEAEmbeddings",
     "OracleEmbeddings",
     "OVHCloudEmbeddings",
     "PremAIEmbeddings",
@@ -381,6 +385,7 @@ _module_lookup = {
     "OllamaEmbeddings": "langchain_community.embeddings.ollama",
     "OpenAIEmbeddings": "langchain_community.embeddings.openai",
     "OpenVINOEmbeddings": "langchain_community.embeddings.openvino",
+    "OPEAEmbeddings": "langchain_community.embeddings.opea",
     "OpenVINOBgeEmbeddings": "langchain_community.embeddings.openvino",
     "QianfanEmbeddingsEndpoint": "langchain_community.embeddings.baidu_qianfan_endpoint",  # noqa: E501
     "QuantizedBgeEmbeddings": "langchain_community.embeddings.itrex",
