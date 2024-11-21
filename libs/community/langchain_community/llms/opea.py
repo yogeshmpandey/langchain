@@ -1,12 +1,43 @@
-﻿from typing import Any, Dict, Optional
+﻿from typing import Any, Dict
+
+from langchain_core.utils import convert_to_secret_str, get_from_dict_or_env, pre_init
+from pydantic import Field, SecretStr
+
 from langchain_community.llms.openai import BaseOpenAI
 from langchain_community.utils.openai import is_openai_v1
 
+DEFAULT_BASE_URL = "https://localhost:8080/v1/"
+DEFAULT_MODEL = "codellama-7b-instruct"
 
-class OPEALLM(BaseOpenAI):
-    """OpenAI-compatible API client for OPEA supported LLMs"""
-    model_name: str
-    api_key: Optional[str] = ""
+
+class OPEALLM(BaseOpenAI):  # type: ignore[override]
+    """OctoAI LLM Endpoints - OpenAI compatible.
+
+    OPEALLM is a class to interact with OPEA OpenAI compatible large
+    language model endpoints.
+
+    To use, you should have the environment variable ``OPEA_API_TOKEN`` set
+    with your API token, or pass it as a named parameter to the constructor.
+
+    Example:
+        .. code-block:: python
+
+            from langchain_community.llms.opea import OPEALLM
+
+            llm = OPEALLM(
+                model="llama-2-13b-chat-fp16",
+                max_tokens=200,
+                presence_penalty=0,
+                temperature=0.1,
+                top_p=0.9,
+            )
+
+    """
+
+    """Key word arguments to pass to the model."""
+    opea_api_base: str = Field(default=DEFAULT_BASE_URL)
+    opea_api_key: SecretStr = Field(default=None)
+    model_name: str = Field(default=DEFAULT_MODEL)
 
     @classmethod
     def is_lc_serializable(cls) -> bool:
@@ -15,23 +46,72 @@ class OPEALLM(BaseOpenAI):
     @property
     def _invocation_params(self) -> Dict[str, Any]:
         """Get the parameters used to invoke the model."""
+
         params: Dict[str, Any] = {
             "model": self.model_name,
             **self._default_params,
-            "logit_bias": None,
         }
         if not is_openai_v1():
-            print("here")
             params.update(
                 {
-                    "api_key": self.api_key,
-                    "api_base": self.base_url,
+                    "api_key": self.opea_api_key.get_secret_value(),
+                    "api_base": self.opea_api_base,
                 }
             )
 
-        return params
+        return {**params, **super()._invocation_params}
 
     @property
     def _llm_type(self) -> str:
         """Return type of llm."""
         return "opea"
+
+    @pre_init
+    def validate_environment(cls, values: Dict) -> Dict:
+        """Validate that api key and python package exists in environment."""
+        values["opea_api_base"] = get_from_dict_or_env(
+            values,
+            "opea_api_base",
+            "OPEA_API_BASE",
+            default=DEFAULT_BASE_URL,
+        )
+        values["opea_api_key"] = convert_to_secret_str(
+            get_from_dict_or_env(values, "opea_api_key", "OPEA_API_KEY")
+        )
+        values["model_name"] = get_from_dict_or_env(
+            values,
+            "model_name",
+            "MODEL_NAME",
+            default=DEFAULT_MODEL,
+        )
+
+        try:
+            import openai
+
+            if is_openai_v1():
+                client_params = {
+                    "api_key": values["opea_api_key"].get_secret_value(),
+                    "base_url": values["opea_api_base"],
+                }
+                if not values.get("client"):
+                    values["client"] = openai.OpenAI(**client_params).completions
+                if not values.get("async_client"):
+                    values["async_client"] = openai.AsyncOpenAI(
+                        **client_params
+                    ).completions
+            else:
+                values["openai_api_base"] = values["opea_api_base"]
+                values["openai_api_key"] = values["opea_api_key"].get_secret_value()
+                values["client"] = openai.Completion  # type: ignore[attr-defined]
+        except ImportError:
+            raise ImportError(
+                "Could not import openai python package. "
+                "Please install it with `pip install openai`."
+            )
+
+        if "endpoint_url" in values["model_kwargs"]:
+            raise ValueError(
+                "`endpoint_url` was deprecated, please use `opea_api_base`."
+            )
+
+        return values
