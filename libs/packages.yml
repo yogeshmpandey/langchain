@@ -59,6 +59,9 @@ packages:
   - name: langchain-openai
     repo: langchain-ai/langchain
     path: libs/partners/openai
+  - name: langchain-opea
+    repo: langchain-ai/langchain
+    path: libs/partners/opea
   - name: langchain-pinecone
     repo: langchain-ai/langchain
     path: libs/partners/pinecone
