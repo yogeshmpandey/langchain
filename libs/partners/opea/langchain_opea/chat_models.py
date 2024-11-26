@@ -131,3 +131,8 @@ class ChatOPEA(BaseChatOpenAI):  # type: ignore[override]
                 **client_params, **async_specific
             ).chat.completions
         return self
+
+    @property
+    def _invocation_params(self) -> Dict[str, Any]:
+        openai_params = {"model": self.model_name}
+        return {**openai_params, **super()._invocation_params}

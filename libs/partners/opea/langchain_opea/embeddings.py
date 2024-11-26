@@ -10,10 +10,6 @@ import openai
 from langchain_core.utils import from_env, secret_from_env
 from typing_extensions import Self
 
-DEFAULT_API_BASE = "https://localhost:6006/v1"
-DEFAULT_MODEL = "thenlper/gte-large"
-
-
 class OPEAEmbeddings(OpenAIEmbeddings):
     """`OPEA` OPENAI Compatible Embeddings API."""
 
@@ -51,17 +47,17 @@ class OPEAEmbeddings(OpenAIEmbeddings):
         """Validate that api key and python package exists in environment."""
         client_params: dict = {
             "api_key": self.opea_api_key.get_secret_value(),
-            "base_url": self.opea_api_base,
+            "base_url": self.opea_api_base
         }
         if not self.client:
             sync_specific = {"http_client": self.http_client}
-            self.client = openai.OpenAI(**client_params, **sync_specific).completions  # type: ignore[arg-type]
+            self.client = openai.OpenAI(**client_params, **sync_specific).embeddings  # type: ignore[arg-type]
         if not self.async_client:
             async_specific = {"http_client": self.http_async_client}
             self.async_client = openai.AsyncOpenAI(
                 **client_params,
                 **async_specific,  # type: ignore[arg-type]
-            ).completions
+            ).embeddings
 
         return self
 
