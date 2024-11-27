@@ -265,5 +265,6 @@ class ChatModelUnitTests(ChatModelTests):
         env_params, model_params, expected_attrs = self.init_from_env_params
         with mock.patch.dict(os.environ, env_params):
             ser = dumpd(model)
+            print(ser)
             assert ser == snapshot(name="serialized")
             assert model.dict() == load(dumpd(model)).dict()

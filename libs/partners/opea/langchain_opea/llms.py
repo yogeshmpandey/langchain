@@ -34,6 +34,7 @@ class OPEALLM(BaseOpenAI):  # type: ignore[override]
             )
 
     """
+
     model_name: str = Field(alias="model")
     """Model name to use."""
     opea_api_key: Optional[SecretStr] = Field(
@@ -54,9 +55,7 @@ class OPEALLM(BaseOpenAI):  # type: ignore[override]
 
     @property
     def lc_secrets(self) -> Dict[str, str]:
-        return {
-            "opea_api_key": "OPEA_API_KEY"
-        }
+        return {"opea_api_key": "OPEA_API_KEY"}
 
     @classmethod
     def is_lc_serializable(cls) -> bool:
@@ -72,11 +71,17 @@ class OPEALLM(BaseOpenAI):  # type: ignore[override]
             raise ValueError("Cannot stream results when n > 1.")
         if self.streaming and self.best_of > 1:
             raise ValueError("Cannot stream results when best_of > 1.")
-
         client_params: dict = {
-            "api_key": self.opea_api_key.get_secret_value(),
+            "api_key": self.opea_api_key.get_secret_value() if self.opea_api_key else None,
             "base_url": self.opea_api_base,
         }
+
+        if client_params["api_key"] is None:
+            raise ValueError(
+            "OPEA_API_KEY is not set. Please set it in the `opea_api_key` field or "
+            "in the `OPEA_API_KEY` environment variable."
+            )
+        
         if not self.client:
             sync_specific = {"http_client": self.http_client}
             self.client = openai.OpenAI(**client_params, **sync_specific).completions  # type: ignore[arg-type]
@@ -88,7 +93,6 @@ class OPEALLM(BaseOpenAI):  # type: ignore[override]
             ).completions
 
         return self
-
 
     @property
     def _invocation_params(self) -> Dict[str, Any]:

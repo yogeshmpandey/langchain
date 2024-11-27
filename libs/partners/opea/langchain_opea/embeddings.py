@@ -10,6 +10,7 @@ import openai
 from langchain_core.utils import from_env, secret_from_env
 from typing_extensions import Self
 
+
 class OPEAEmbeddings(OpenAIEmbeddings):
     """`OPEA` OPENAI Compatible Embeddings API."""
 
@@ -33,9 +34,7 @@ class OPEAEmbeddings(OpenAIEmbeddings):
 
     @property
     def lc_secrets(self) -> Dict[str, str]:
-        return {
-            "opea_api_key": "OPEA_API_KEY"
-        }
+        return {"opea_api_key": "OPEA_API_KEY"}
 
     @classmethod
     def is_lc_serializable(cls) -> bool:
@@ -47,7 +46,7 @@ class OPEAEmbeddings(OpenAIEmbeddings):
         """Validate that api key and python package exists in environment."""
         client_params: dict = {
             "api_key": self.opea_api_key.get_secret_value(),
-            "base_url": self.opea_api_base
+            "base_url": self.opea_api_base,
         }
         if not self.client:
             sync_specific = {"http_client": self.http_client}
@@ -60,7 +59,6 @@ class OPEAEmbeddings(OpenAIEmbeddings):
             ).embeddings
 
         return self
-
 
     @property
     def _invocation_params(self) -> Dict[str, Any]:
